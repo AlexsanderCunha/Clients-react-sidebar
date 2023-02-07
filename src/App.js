@@ -14,7 +14,7 @@ const routers = createBrowserRouter([
     element: <TableClient/>,
   },
   {
-    path: "/clients",
+    path: "/clients/:stateid",
     element: <Form/>,
   },
 ]);

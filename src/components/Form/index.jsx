@@ -10,15 +10,16 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { generatePath } from "react-router";
+import InputMask from "react-input-mask";
 import axios from "axios";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const validarCpf = require('validar-cpf');
 import {
   useNavigate,
-  useLocation
+  useLocation,
+  useParams
 } from "react-router-dom";
-
 
 function Form() {
   const [id, setId] = useState(null)
@@ -32,15 +33,13 @@ function Form() {
   const [state, setState] = useState(null);
   const [isSaving, setIsSaving] = useState(false)
   let navigate = useNavigate();
-  const location = useLocation()
+  const { stateid } = useParams();
 
   useEffect(() => {
-    if (location?.state) {
-      getClient(location?.state)
+    if (stateid && stateid !== 'new') {
+      getClient(stateid)
     }
-
-  }, [location.state])
-
+  }, [stateid])
 
   const handleSave = () => {
     setIsSaving(true)
@@ -57,7 +56,7 @@ function Form() {
         theme: "light",
       });
     };
-    if (!validateEmail(email)){
+    if (!validateEmail(email)) {
       setIsSaving(false)
       return toast.error('E-mail invalido', {
         position: "top-right",
@@ -70,10 +69,10 @@ function Form() {
         theme: "light",
       });
     }
-  
+
     if (!validarCpf(cpf)) {
       setIsSaving(false)
-    return  toast.error('CPF invalido', {
+      return toast.error('CPF invalido', {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -84,12 +83,11 @@ function Form() {
         theme: "light",
       });
     }
-    if(id){
+    if (id) {
       updateClient({ id: id, name: name, email: email, phone: phone, cpf: cpf, address: address, district: district, city: city, state: state })
-    }else{
+    } else {
       saveClient({ id: null, name: name, email: email, phone: phone, cpf: cpf, address: address, district: district, city: city, state: state })
     }
-    saveClient({ id: null, name: name, email: email, phone: phone, cpf: cpf, address: address, district: district, city: city, state: state })
     toast.success('salvo com sucesso', {
       position: "top-right",
       autoClose: 5000,
@@ -101,7 +99,10 @@ function Form() {
       theme: "light",
     });
     setIsSaving(false)
-    return navigate("/")
+    return navigate("/", {
+      state: true
+    }
+    )
   };
 
   function validateEmail(email) {
@@ -109,9 +110,9 @@ function Form() {
     return re.test(email);
   }
 
-  async function updateClient(dataEdit){
+  async function updateClient(dataEdit) {
     try {
-        await axios.put(`http://localhost:8080/clients/${dataEdit.id}`, dataEdit, {
+      await axios.put(`http://localhost:8080/clients/${dataEdit.id}`, dataEdit, {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         }
@@ -122,9 +123,9 @@ function Form() {
     }
   }
 
-  async function getClient(id){
+  async function getClient(id) {
     try {
-     const response = await axios.get(`http://localhost:8080/clients/${id}`, {
+      const response = await axios.get(`http://localhost:8080/clients/${id}`, {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         }
@@ -204,10 +205,14 @@ function Form() {
             <Box w="100%">
               <FormLabel htmlFor="cpf">CPF</FormLabel>
               <Input
+                as={InputMask}
+                mask="***.***.***.-**"
+                maskChar={null}
                 id="cpf"
                 fullWidth
                 type="tel"
                 placeholder="000.000.000-00"
+                borderRadius="5px 5px 5px"
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)} />
             </Box>
@@ -224,9 +229,11 @@ function Form() {
             <Box w="100%">
               <FormLabel htmlFor="phone">Telefone</FormLabel>
               <Input
+                as={InputMask}
+                mask="(**)*****-****"
+                maskChar={null}
                 id="phone"
                 placeholder="(00) 00000-0000"
-                type="number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)} />
             </Box>
@@ -277,7 +284,7 @@ function Form() {
               disabled={isSaving ? true : false}
               _hover={{ bg: "gray" }}
             >
-              salvar
+              Salvar
             </Button>
           </HStack>
         </FormControl>

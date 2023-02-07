@@ -21,7 +21,7 @@ const Sidebar = ({ active }) => {
         <a href={`/`}>
           <SidebarItem Icon={FaHome} Text="Página Inicial" />
         </a>
-        <a href='/clients'>
+        <a href='/clients/new'>
           <SidebarItem Icon={FaUserAlt} Text="Clientes" />
         </a>
       </Content>
